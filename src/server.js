@@ -51,7 +51,7 @@ class Server extends EventEmitter {
 			socket.myident = Symbol("socket-" + (++this.socketcount));
 		}
 
-		var messager = new Messager(Object.assign(this.conf, {log_prefix: 'messager_server:'}), socket);
+		var messager = new Messager(Object.assign({}, this.conf, {log_prefix: 'messager_server:'}), socket);
 
 		messager.on('message', (m) => {
 			this.emit('message', m, messager);

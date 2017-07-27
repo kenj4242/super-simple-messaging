@@ -1,7 +1,7 @@
 const conf = require('super-simple-node-config')();
 const ssms = require('../dist/server.js');
 
-const ssmServer = new ssms(Object.assign(conf, {debug: false, log_prefix: "messager_server"}));
+const ssmServer = new ssms(Object.assign({}, conf, {debug: false, log_prefix: "messager_server"}));
 
 ssmServer.on('listening', function(server) {
 	console.log('EchoServer listening on '+server.address());

@@ -90,11 +90,9 @@ class Messager extends EventEmitter {
 				reject(e);
 			}
 
-			this.log("adding error listener");
 			this.socket.once('error', errorListen);
 
 			this.socket.write(msg, () => {
-				this.log("date written for send, removing error listener");
 				this.socket.removeListener('error', errorListen);
 				resolve();
 			});
@@ -109,24 +107,18 @@ class Messager extends EventEmitter {
 			var mssgListen, errorListen;
 
 			mssgListen = (m) => {
-				this.log('message listener fired');
 				resolve(m);
 			}
 
 			errorListen = (e) => {
-				this.log("error fired, removing message listener");
 				this.removeListener('message', mssgListen);
 				reject(e);
 			}
 
-			this.log("adding message listener");
 			this.once('message', mssgListen);
-
-			this.log("adding error listener");
 			this.socket.once('error', errorListen);
 
 			this.socket.write(msg, () => {
-				this.log("date written for message wait, removing error listener");
 				this.socket.removeListener('error', errorListen);
 			});
 		});
