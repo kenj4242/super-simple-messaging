@@ -1,13 +1,11 @@
-const conf = require('super-simple-node-config')();
 const net = require('net');
 const EventEmitter = require('events');
-const MessageHandler = require('./protocol');
+const Messager = require('./messager');
 
 class Server extends EventEmitter {
 
 	constructor(conf) {
-		super(conf.protocol);
-		conf.listen = conf.listen || {};
+		super();
 		this.conf = conf;
 		this.socketcount = 0;
 	}
@@ -19,7 +17,7 @@ class Server extends EventEmitter {
 		this.server.on('listening', () => { this.listeningHandler() });
 		this.server.on('connection', s => { this.connectionHandler(s) });
 
-		this.server.listen(this.conf.listen);
+		this.server.listen(this.conf);
 	}
 
 	errorHandler(e, socket) {
@@ -28,14 +26,14 @@ class Server extends EventEmitter {
 			console.log('Listen address in use, retrying...');
 			this.server.close();
 			setTimeout(() => {
-				this.server.listen(this.conf.listen);
+				this.listen(); // restart the server
 			}, 500);
 		}
 		this.emit('error', e);
 	}
 
 	closeHandler() {
-		let path = this.conf.listen.path;
+		let path = this.conf.path;
 		if (path && path.length) {
 			let unlink = require('fs').unlinkSync;
 			unlink(path);
@@ -49,16 +47,14 @@ class Server extends EventEmitter {
 
 	connectionHandler(socket) {
 
-		socket.myident = Symbol("socket-" + (++this.socketcount));
+		if (!socket.myident) {
+			socket.myident = Symbol("socket-" + (++this.socketcount));
+		}
 
-		var messager = new MessageHandler(socket, conf.protocol);
+		var messager = new Messager(Object.assign(this.conf, {log_prefix: 'messager_server:'}), socket);
 
 		messager.on('message', (m) => {
 			this.emit('message', m, messager);
-		});
-
-		messager.on('error', (e) => {
-			this.emit('error', e);
 		});
 	}
 }

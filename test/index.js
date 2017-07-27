@@ -8,7 +8,7 @@ const ssmc = require('../dist/client.js');
 describe('Server/Client Tests', function() {
 
 	var echoServer;
-	var ssmClient = new ssmc(conf.listen);
+	var ssmClient = new ssmc(Object.assign(conf, {debug: true, log_prefix: 'messager_client'}));
 
 	before('spawn an echo server in a seperate process', async function() {
 		echoServer = await spawn('node', ['test/echoServer.js']);
@@ -17,11 +17,11 @@ describe('Server/Client Tests', function() {
 		});
 
 		echoServer.stdout.on('data', (data) => {
-			console.log(`EchoServer <>: ${data}`);
+			console.log(`ESo:${data}`);
 		});
 
 		echoServer.stderr.on('data', (data) => {
-			console.log(`EchoServer <2>: ${data}`);
+			console.log(`ESe: ${data}`);
 		});
 
 		return new Promise(function(resolve, reject) {
@@ -37,7 +37,6 @@ describe('Server/Client Tests', function() {
 	after('destroy the echo server', async function() {
 		echoServer.kill();
 	});
-
 
 	describe('Client Connection', function() {
 
@@ -56,42 +55,32 @@ describe('Server/Client Tests', function() {
 			await checkEchoMessage('test', payload);
 		});
 
-		it('should send a lot of variable-length messages, and get proper replies for all', async function() {
+		it('should send 200 random, variable-length messages in sequence, and get proper replies for all', async function() {
 			this.timeout(200000);
+			var payload, x;
 
-			/*
-			for(let i = 0; i < 50; i++) {
-				var payload = randomstring.generate({ length: getRandomIntInclusive(0, 4096) });
-				await checkEchoMessage('test', payload);
+			for(x = 0; x < 100; x++) {
+				console.log(x+'...');
+				payload = randomstring.generate({ length: getRandomIntInclusive(0, 4096) });
+				await checkEchoMessage('test'+x, payload);
 			}
-			
-			var payload = "";
+
+			// make sure we get at least one zero length message in this middle here
+			payload = "";
 			await checkEchoMessage('test', payload);
 
-			for(let i = 0; i < 50; i++) {
-				var payload = randomstring.generate({ length: getRandomIntInclusive(0, 4096) });
-				await checkEchoMessage('test', payload);
+			for(x = 101; x < 200; x++) {
+				payload = randomstring.generate({ length: getRandomIntInclusive(0, 4096) });
+				await checkEchoMessage('test'+x, payload);
 			}
-			*/
-			var ps = [];
 
-			for(let x = 0; x < 100; x++) {
-				console.log(x+'.');
-				for(let i = 0; i < 100; i++) {
-					var payload = randomstring.generate({ length: getRandomIntInclusive(0, 196) });
-					ps.push(checkEchoMessage('test'+x+'-'+i, payload));
-					console.log("  "+i+'.');
-				}
-				await Promise.all(ps);
-				Promise.delay(1);
-			}
 		});
 
 	});
 
 
 	async function checkEchoMessage(type, mssg) {
-		var response = await ssmClient.sendMessage(type, mssg);
+		var response = await ssmClient.request(type, mssg);
 
 		var data = response.data.toString('utf8');
 

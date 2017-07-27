@@ -1,45 +1,48 @@
 const Promise = require('bluebird');
-const conf = require('super-simple-node-config')();
 const net = require('net');
-const EventEmitter = require('events');
-const MessageHandler = require('./protocol');
+//const EventEmitter = require('events');
+const Messager = require('./messager');
 
-class Client extends EventEmitter {
+class Client {
 
 	constructor(conf) {
-		super();
 		this.conf = conf;
+		this.messager = new Messager(Object.assign(conf, {log_prefix: "messager_client:"}));
+
+		this.reqQ = [];
 	}
 
-	async connect() {
-		var socket = new net.Socket();
-		if (this.conf.keepAlive) {
-			socket.setKeepAlive(true);
+	async connect(forceNew) {
+		if (!forceNew && this.socket && !this.socket.destroyed) {
+			// assume the current socket is still good,
+			// no way we can know otherwise I guess...
+			return this.socket;
 		}
-		var messager = new MessageHandler(socket, conf.protocol);
 
+		// create a new socket for this client
 		return new Promise((resolve, reject) => {
-			socket.on('connect', () => {
-				this.emit('connected');
-				resolve(messager);
-			})
-			socket.once('error', (e) => {
-				reject(e);
+			this.socket = new net.Socket();
+			if (this.keep_alive) {
+				this.socket.setKeepAlive(true);
+			}
+			this.messager.setSocket(this.socket);
+
+			this.socket.once('connect', () => {
+				resolve(this.socket)
 			});
-			socket.connect(this.conf);
+			this.socket.once('error', (e) => {
+				reject(e)
+			});
+			this.socket.connect(this.conf);
 		});
 	}
 
-	async sendMessage(type, payload, encoding) {
-		// connect on-demand
-		var messager = await this.connect();
-		var ret = await messager.sendWait(type, payload, encoding);
-		messager.close();
-		return ret;
+	async request(type, payload, encoding) {
+		await this.connect();
+		return this.messager.sendWait(type, payload, encoding);
 	}
 
 }
-
 
 module.exports = Client;
 

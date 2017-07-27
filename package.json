@@ -21,6 +21,6 @@
     "mocha": "^3.4.2",
     "nodemon": "^1.11.0",
     "randomstring": "^1.1.5",
-    "super-simple-node-config": "^1.0.3"
+    "super-simple-node-config": "^1.0.4"
   }
 }

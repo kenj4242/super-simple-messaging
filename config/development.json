@@ -1,10 +1,7 @@
 {
-	"listen": {
-		"port": null,
-		"host": "127.0.0.1",
-		"path": "/tmp/tc-next.provisioning.sock",
-		"keepAlive": true
-	},
-	"protocol": {
-	}
+	"port": null,
+	"host": "127.0.0.1",
+	"path": "/tmp/tc-next.provisioning.sock",
+	"debug": true,
+	"log_prefix": "::"
 }
