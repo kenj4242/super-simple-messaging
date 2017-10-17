@@ -14,7 +14,6 @@ class SocketPool {
 		this.conf = Object.assign({}, defaults, conf || {});
 		this.pool = [];
 		this.reqQ = [];
-		this.log('START----------------------------------------------------------------------');
 	}
 
 	async getMessager(mconf) {

@@ -1,7 +1,7 @@
 {
-	"port": null,
+	"portsadf": 9994,
 	"host": "127.0.0.1",
 	"path": "/tmp/tc-next.provisioning.sock",
-	"debug": true,
+	"debug": false,
 	"log_prefix": "::"
 }

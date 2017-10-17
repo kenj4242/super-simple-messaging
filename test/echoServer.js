@@ -4,7 +4,7 @@ const ssms = require('../dist/server.js');
 const ssmServer = new ssms(Object.assign({}, conf, {debug: false, log_prefix: "messager_server"}));
 
 ssmServer.on('listening', function(server) {
-	console.log('EchoServer listening on '+server.address());
+	console.log('EchoServer listening on '+ JSON.stringify(server.address()));
 });
 
 ssmServer.on('error', e => {
