@@ -10,6 +10,10 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+	"repository": {
+      "type": "git",
+      "url": "https://github.com/kenj4242/super-simple-messaging"
+  },
   "dependencies": {
     "bluebird": "^3.5.0"
   },
